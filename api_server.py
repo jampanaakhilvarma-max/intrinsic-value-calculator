@@ -12,6 +12,7 @@ from typing import Optional, List, Dict, Any
 import traceback
 import logging
 import os
+import uvicorn
 
 # Import the existing working backend functions
 from src.provider import get_info, dcf
@@ -338,13 +339,40 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "message": "API is running"}
 
-@app.get("/")
-async def read_index():
-    """Serve the main HTML page"""
-    return FileResponse('index.html')
+# Mount static files for React app (if built)
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    
+    @app.get("/")
+    async def read_react_app():
+        """Serve the React app"""
+        index_file = os.path.join(static_dir, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        else:
+            return FileResponse('index.html')  # Fallback to API documentation
+    
+    # Catch all route for React Router (SPA routing)
+    @app.get("/{path:path}")
+    async def catch_all(path: str):
+        """Catch-all route to serve React app for client-side routing"""
+        # Don't intercept API routes
+        if path.startswith("api/") or path.startswith("health"):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+        
+        # Serve React app for all other routes
+        index_file = os.path.join(static_dir, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        else:
+            raise HTTPException(status_code=404, detail="Page not found")
+else:
+    @app.get("/")
+    async def read_index():
+        """Serve the main HTML page (fallback when React app not built)"""
+        return FileResponse('index.html')
 
 if __name__ == "__main__":
-    import uvicorn
-    import os
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run("api_server:app", host="0.0.0.0", port=port)

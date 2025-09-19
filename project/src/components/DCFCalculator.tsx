@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calculator, Search, TrendingUp, DollarSign, BarChart3, Moon, Sun, ArrowRight, Loader2, HelpCircle, Info, ChevronDown } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 interface CompanyData {
   ticker: string;
@@ -263,7 +264,7 @@ const DCFCalculator: React.FC = () => {
 
   const fetchCompanyData = async (tickerSymbol: string): Promise<CompanyData> => {
     try {
-      const response = await fetch('http://localhost:8000/api/get_company_info', {
+      const response = await fetch(API_ENDPOINTS.getCompanyInfo, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -312,7 +313,7 @@ const DCFCalculator: React.FC = () => {
     if (!companyData) return;
 
     try {
-      const response = await fetch('http://localhost:8000/api/calculate_dcf', {
+      const response = await fetch(API_ENDPOINTS.calculateDCF, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

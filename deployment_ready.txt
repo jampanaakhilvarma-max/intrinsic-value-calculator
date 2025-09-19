@@ -1,0 +1,25 @@
+GitHub Repository Created - Next Steps
+=======================================
+
+After creating the GitHub repository at:
+https://github.com/jampanaakhilvarma-max/intrinsic-value-calculator
+
+Run this command to push your code:
+
+cd "d:\ai proj\Intrinsic-Value-Calculator-main"; & "C:\Program Files\Git\bin\git.exe" push -u origin main
+
+Then proceed to Railway deployment at:
+https://railway.app
+
+Railway Deployment Steps:
+1. Go to https://railway.app
+2. Sign in (can use GitHub account)
+3. Click "Deploy from GitHub repo"
+4. Select "jampanaakhilvarma-max/intrinsic-value-calculator"
+5. Railway will automatically detect the configuration and deploy!
+
+Your app will be deployed with:
+- Python FastAPI backend
+- Railway configuration from railway.json
+- All dependencies from requirements.txt
+- Proper CORS settings for production

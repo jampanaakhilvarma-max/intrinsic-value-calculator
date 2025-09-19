@@ -1,0 +1,22 @@
+Next Steps - GitHub Commands
+============================
+
+After creating your GitHub repository, run these commands:
+
+1. Connect your local repo to GitHub (replace YOUR_USERNAME with your actual GitHub username):
+
+cd "d:\ai proj\Intrinsic-Value-Calculator-main"
+& "C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/YOUR_USERNAME/intrinsic-value-calculator.git
+
+2. Set the main branch:
+
+& "C:\Program Files\Git\bin\git.exe" branch -M main
+
+3. Push your code to GitHub:
+
+& "C:\Program Files\Git\bin\git.exe" push -u origin main
+
+Example with username "johndoe":
+& "C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/johndoe/intrinsic-value-calculator.git
+
+Then proceed to Railway deployment!

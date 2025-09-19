@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ['nodejs', 'npm', 'python311']
+
+[phases.build]
+cmds = [
+    'cd project && npm install',
+    'cd project && npm run build',
+    'python build_frontend.py'
+]
+
+[phases.start]
+cmd = 'python api_server.py'
