@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCF Calculator - Intrinsic Value Calculator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #64ffda, #1976d2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .feature h3 {
+            color: #64ffda;
+            margin-bottom: 0.5rem;
+        }
+        .api-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .endpoint {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            text-align: left;
+        }
+        .method {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        .post { background: #4caf50; }
+        .get { background: #2196f3; }
+        .status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #4caf50;
+            border-radius: 20px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 DCF Calculator API</h1>
+        <p class="subtitle">Warren Buffett Style Intrinsic Value Calculator for Indian Stocks</p>
+        <div class="status">✅ API Status: Online</div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>📊 Stock Analysis</h3>
+                <p>Get comprehensive financial data for NSE listed stocks</p>
+            </div>
+            <div class="feature">
+                <h3>💰 DCF Valuation</h3>
+                <p>Calculate intrinsic value using Discounted Cash Flow model</p>
+            </div>
+            <div class="feature">
+                <h3>📈 Historical Data</h3>
+                <p>Revenue growth, FCF margins, and dilution analysis</p>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2>🔌 API Endpoints</h2>
+            
+            <div class="endpoint">
+                <div>
+                    <span class="method post">POST</span>
+                    <strong>/api/get_company_info</strong>
+                </div>
+                <p>Get company financial data and historical metrics</p>
+                <code>{"ticker": "RELIANCE.NS"}</code>
+            </div>
+
+            <div class="endpoint">
+                <div>
+                    <span class="method post">POST</span>
+                    <strong>/api/calculate_dcf</strong>
+                </div>
+                <p>Calculate DCF valuation with custom parameters</p>
+                <code>{"ticker": "TCS.NS", "revenueGrowthRate": 15, "fcfMargin": 20, "numberOfYears": 7, "discountRate": 10, "terminalGrowthRate": 6}</code>
+            </div>
+
+            <div class="endpoint">
+                <div>
+                    <span class="method get">GET</span>
+                    <strong>/health</strong>
+                </div>
+                <p>Health check endpoint</p>
+            </div>
+
+            <div class="endpoint">
+                <div>
+                    <span class="method get">GET</span>
+                    <strong>/docs</strong>
+                </div>
+                <p>Interactive API documentation (Swagger UI)</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <p>🌟 Built for analyzing Indian Stock Market (NSE)</p>
+            <p>💡 Supports 500+ listed companies</p>
+            <p>⚡ Real-time data from Yahoo Finance</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple API health check
+        fetch('/health')
+            .then(response => response.json())
+            .then(data => {
+                console.log('API Health:', data);
+            })
+            .catch(error => {
+                console.log('API might be starting up...', error);
+                document.querySelector('.status').innerHTML = '⚠️ API Status: Starting up...';
+                document.querySelector('.status').style.background = '#ff9800';
+            });
+    </script>
+</body>
+</html>
