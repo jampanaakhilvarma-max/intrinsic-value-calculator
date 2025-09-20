@@ -264,7 +264,7 @@ const DCFCalculator: React.FC = () => {
 
   const fetchCompanyData = async (tickerSymbol: string): Promise<CompanyData> => {
     try {
-      const response = await fetch(API_ENDPOINTS.getCompanyInfo, {
+      const response = await fetch(API_ENDPOINTS.GET_COMPANY_INFO, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -313,7 +313,7 @@ const DCFCalculator: React.FC = () => {
     if (!companyData) return;
 
     try {
-      const response = await fetch(API_ENDPOINTS.calculateDCF, {
+      const response = await fetch(API_ENDPOINTS.CALCULATE_DCF, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -401,16 +401,23 @@ const DCFCalculator: React.FC = () => {
   // Helper function to format large numbers with proper currency
   const formatCurrency = (value: number, currency: string, type: 'marketCap' | 'revenue' | 'shares') => {
     if (currency === 'INR') {
-      if (type === 'marketCap' || type === 'revenue') {
-        return `₹${value.toLocaleString()} Cr`;
+      if (type === 'marketCap') {
+        // Market cap is already in crores
+        return `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })} Cr`;
+      } else if (type === 'revenue') {
+        // Revenue is already in crores
+        return `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })} Cr`;
       } else if (type === 'shares') {
-        return `${value.toLocaleString()} Cr`;
+        // Shares are already in crores
+        return `${value.toFixed(2)} Cr`;
       }
     } else if (currency === 'USD') {
-      if (type === 'marketCap' || type === 'revenue') {
-        return `$${value.toLocaleString()}B`;
+      if (type === 'marketCap') {
+        return `$${(value/1000).toFixed(1)}B`;
+      } else if (type === 'revenue') {
+        return `$${(value/1000).toFixed(1)}B`;
       } else if (type === 'shares') {
-        return `${value.toLocaleString()}B`;
+        return `${(value/1000).toFixed(2)}B`;
       }
     }
     return value.toLocaleString();
@@ -813,9 +820,21 @@ const DCFCalculator: React.FC = () => {
                     <input
                       type="number"
                       value={dcfInputs.revenueGrowthRate}
-                      onChange={(e) => setDCFInputs(prev => ({ ...prev, revenueGrowthRate: parseFloat(e.target.value) || 0 }))}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty string for better editing experience
+                        if (value === '') {
+                          setDCFInputs(prev => ({ ...prev, revenueGrowthRate: 0 }));
+                        } else {
+                          const numValue = parseFloat(value);
+                          if (!isNaN(numValue)) {
+                            setDCFInputs(prev => ({ ...prev, revenueGrowthRate: numValue }));
+                          }
+                        }
+                      }}
                       className={`w-full px-6 py-4 text-xl rounded-xl border-2 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all ${inputClasses}`}
                       step="0.01"
+                      min="0"
                     />
                     <p className="text-sm opacity-70 mt-2">Using 3-year average: {companyData.historicalData.revenueGrowth3Y}%</p>
                   </div>
@@ -832,9 +851,20 @@ const DCFCalculator: React.FC = () => {
                     <input
                       type="number"
                       value={dcfInputs.fcfMargin}
-                      onChange={(e) => setDCFInputs(prev => ({ ...prev, fcfMargin: parseFloat(e.target.value) || 0 }))}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          setDCFInputs(prev => ({ ...prev, fcfMargin: 0 }));
+                        } else {
+                          const numValue = parseFloat(value);
+                          if (!isNaN(numValue)) {
+                            setDCFInputs(prev => ({ ...prev, fcfMargin: numValue }));
+                          }
+                        }
+                      }}
                       className={`w-full px-6 py-4 text-xl rounded-xl border-2 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all ${inputClasses}`}
                       step="0.01"
+                      min="0"
                     />
                     <p className="text-sm opacity-70 mt-2">Using 3-year average: {companyData.historicalData.fcfMargin3Y}%</p>
                   </div>
@@ -851,7 +881,17 @@ const DCFCalculator: React.FC = () => {
                     <input
                       type="number"
                       value={dcfInputs.numberOfYears}
-                      onChange={(e) => setDCFInputs(prev => ({ ...prev, numberOfYears: parseInt(e.target.value) || 7 }))}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          setDCFInputs(prev => ({ ...prev, numberOfYears: 7 }));
+                        } else {
+                          const numValue = parseInt(value);
+                          if (!isNaN(numValue) && numValue > 0) {
+                            setDCFInputs(prev => ({ ...prev, numberOfYears: numValue }));
+                          }
+                        }
+                      }}
                       className={`w-full px-6 py-4 text-xl rounded-xl border-2 focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all ${inputClasses}`}
                       min="1"
                       max="20"
@@ -873,7 +913,17 @@ const DCFCalculator: React.FC = () => {
                     <input
                       type="number"
                       value={dcfInputs.discountRate}
-                      onChange={(e) => setDCFInputs(prev => ({ ...prev, discountRate: parseFloat(e.target.value) || 10 }))}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          setDCFInputs(prev => ({ ...prev, discountRate: 10 }));
+                        } else {
+                          const numValue = parseFloat(value);
+                          if (!isNaN(numValue) && numValue > 0) {
+                            setDCFInputs(prev => ({ ...prev, discountRate: numValue }));
+                          }
+                        }
+                      }}
                       className={`w-full px-6 py-4 text-xl rounded-xl border-2 focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all ${inputClasses}`}
                       step="0.1"
                     />
@@ -892,7 +942,17 @@ const DCFCalculator: React.FC = () => {
                     <input
                       type="number"
                       value={dcfInputs.terminalGrowthRate}
-                      onChange={(e) => setDCFInputs(prev => ({ ...prev, terminalGrowthRate: parseFloat(e.target.value) || 6 }))}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          setDCFInputs(prev => ({ ...prev, terminalGrowthRate: 6 }));
+                        } else {
+                          const numValue = parseFloat(value);
+                          if (!isNaN(numValue) && numValue >= 0) {
+                            setDCFInputs(prev => ({ ...prev, terminalGrowthRate: numValue }));
+                          }
+                        }
+                      }}
                       className={`w-full px-6 py-4 text-xl rounded-xl border-2 focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all ${inputClasses}`}
                       step="0.1"
                     />

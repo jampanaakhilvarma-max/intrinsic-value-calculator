@@ -1,0 +1,4 @@
+stock,fair_value,current_price,upside/(downside),assumed_revenue_growth(%),assumed_fcf_margin (%),current_price_rev_growth (%),current_price_fcf_margin (%),current_price_required_return (%)
+UNH,$639.38,$334.82,90.96%,10.0%,7.0%,-1.66%,3.67%,16.12%
+GS,$211.12,$804.31,-73.75%,6.5%,7.0%,32.17%,26.67%,4.53%
+MSFT,$231.56,$508.45,-54.46%,11.0%,28.0%,26.02%,61.48%,6.07%

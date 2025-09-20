@@ -1,0 +1,12 @@
+[build]
+cmd = "cd project && npm install && npm run build"
+
+[start]
+cmd = "python api_server.py"
+
+[variables]
+PORT = "8000"
+
+[[ports]]
+port = 8000
+protocol = "http"

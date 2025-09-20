@@ -111,8 +111,8 @@ def get_info(ticker):
   avgVol           = get_out_str(float(stock_info['averageVolume'])) if 'averageVolume' in stock_info and not np.isnan(stock_info['averageVolume']) else '-'
   mcap             = '$'+get_out_str(float(stock_info['marketCap'] / conversion_multiples.get(currency, 1.0))) if 'marketCap' in stock_info and not np.isnan(stock_info['marketCap']) else '-'
 
-  # For populating stock related data
-  extra_info = ['$'+get_out_str(starting_rev / conversion_multiples.get(financial_curr, 1.0)), get_out_str(total_shares), percFloat, percent_short, avgVol, mcap, conversion_multiples.get(financial_curr, 1.0)]
+  # For populating stock related data - include financial currency for USD conversion detection
+  extra_info = ['$'+get_out_str(starting_rev / conversion_multiples.get(financial_curr, 1.0)), get_out_str(total_shares), percFloat, percent_short, avgVol, mcap, conversion_multiples.get(financial_curr, 1.0), financial_curr]
   
   # # [Maybe in future]
   # business_summary = stock_info['longBusinessSummary'] if not np.isnan(stock_info['longBusinessSummary']) else '-'

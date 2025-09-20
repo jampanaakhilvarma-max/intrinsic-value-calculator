@@ -99,8 +99,8 @@ if __name__ == '__main__':
     for t in data.index:
       tmp_list = []
       tmp_list.append(t)
-      current_price, total_shares, prev_rev_growth, starting_rev, prev_fcf_margin, data = get_info(t)
-      print(data, '\n')
+      current_price, total_shares, prev_rev_growth, starting_rev, prev_fcf_margin, info_data, extra_info = get_info(t)
+      print(info_data, '\n')
       time.sleep(2.5) # Allow 2 requests per 5 second interval
       results = dcf(data.loc[t]['Rev_Growth_Estimate (%)']/100., data.loc[t]['FCF_Margin_Estimate (%)']/100., args.N, starting_rev, args.rrr/100., args.tgr/100., total_shares, current_price)
       fv, r_rg, r_wacc, r_fcf, rev_growth = results
