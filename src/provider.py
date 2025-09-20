@@ -26,10 +26,29 @@ from requests.adapters import HTTPAdapter
 
 def make_session():
     if USE_CURL_CFFI:
-        # Use curl_cffi session for latest yfinance
-        s = curl_requests.Session()
+        # Use curl_cffi session with browser TLS fingerprinting
+        s = curl_requests.Session(
+            # Impersonate Chrome browser TLS fingerprint
+            impersonate="chrome120",
+            # Additional options for better browser simulation
+            timeout=30
+        )
         s.headers.update({
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Windows"',
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache"
         })
         return s
     else:
@@ -61,15 +80,27 @@ def get_basic_stock_data(ticker):
     time.sleep(random.uniform(1, 3))
     
     try:
-        # Try direct API call
+        # Try direct API call with proper browser simulation
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Referer': 'https://finance.yahoo.com/'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': 'https://finance.yahoo.com/',
+            'Accept': 'application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"'
         }
         
         if USE_CURL_CFFI:
-            response = curl_requests.get(url, headers=headers, timeout=15)
+            # Use curl_cffi with browser TLS fingerprint
+            session = curl_requests.Session(impersonate="chrome120")
+            response = session.get(url, headers=headers, timeout=15)
         else:
             response = requests.get(url, headers=headers, timeout=15)
             
