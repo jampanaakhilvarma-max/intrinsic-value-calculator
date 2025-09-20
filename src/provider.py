@@ -12,6 +12,30 @@ from tabulate import tabulate
 from scipy.optimize import minimize_scalar
 import functools
 
+# Add shared session for yfinance to fix 429 errors on EC2
+import requests
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+
+def make_session():
+    s = requests.Session()
+    s.headers.update({
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+    })
+    retry = Retry(
+        total=5, 
+        backoff_factor=0.8, 
+        status_forcelist=[429,500,502,503,504], 
+        allowed_methods=["GET","HEAD"]
+    )
+    adapter = HTTPAdapter(max_retries=retry, pool_connections=20, pool_maxsize=20)
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+    return s
+
+# Create shared session
+shared_session = make_session()
+
 currency_symbols = {'USD':'$', 'JPY':'¥', 'AUD':'$', 'NZD':'$', 'EUR':'€', 'GBP':'£', 'ARS':'$', 'HKD':'$', 'INR':'₹', 'CAD':'$', 'MXN':'$', 'IDR':'Rp.', 'SGD':'$', 'CNY':'CN¥', 'TWD':'$'}
 # Hardcoded conversion multiples - all set to 1.0 to eliminate currency conversion
 conversion_multiples = {'USD':1.0, 'JPY':1.0, 'AUD':1.0, 'NZD':1.0, 'EUR':1.0, 'GBP':1.0, 'ARS':1.0, 'HKD':1.0, 'INR':1.0, 'CAD':1.0, 'MXN':1.0, 'IDR':1.0, 'SGD':1.0, 'CNY':1.0, 'TWD':1.0}
@@ -32,7 +56,7 @@ def not_a_float(num):
 
 @functools.cache
 def get_info(ticker):
-  stock      = yf.Ticker(ticker)
+  stock      = yf.Ticker(ticker, session=shared_session)
   income     = stock.income_stmt
   cashflow   = stock.cashflow
   stock_info = stock.info
