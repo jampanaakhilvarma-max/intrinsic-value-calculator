@@ -13,25 +13,41 @@ from scipy.optimize import minimize_scalar
 import functools
 
 # Add shared session for yfinance to fix 429 errors on EC2
+try:
+    from curl_cffi import requests as curl_requests
+    USE_CURL_CFFI = True
+except ImportError:
+    import requests as curl_requests
+    USE_CURL_CFFI = False
+
 import requests
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
 def make_session():
-    s = requests.Session()
-    s.headers.update({
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-    })
-    retry = Retry(
-        total=5, 
-        backoff_factor=0.8, 
-        status_forcelist=[429,500,502,503,504], 
-        allowed_methods=["GET","HEAD"]
-    )
-    adapter = HTTPAdapter(max_retries=retry, pool_connections=20, pool_maxsize=20)
-    s.mount("https://", adapter)
-    s.mount("http://", adapter)
-    return s
+    if USE_CURL_CFFI:
+        # Use curl_cffi session for latest yfinance
+        s = curl_requests.Session()
+        s.headers.update({
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        })
+        return s
+    else:
+        # Fallback to regular requests session
+        s = requests.Session()
+        s.headers.update({
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        })
+        retry = Retry(
+            total=5, 
+            backoff_factor=0.8, 
+            status_forcelist=[429,500,502,503,504], 
+            allowed_methods=["GET","HEAD"]
+        )
+        adapter = HTTPAdapter(max_retries=retry, pool_connections=20, pool_maxsize=20)
+        s.mount("https://", adapter)
+        s.mount("http://", adapter)
+        return s
 
 # Create shared session
 shared_session = make_session()
