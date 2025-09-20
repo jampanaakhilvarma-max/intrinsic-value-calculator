@@ -52,6 +52,44 @@ def make_session():
 # Create shared session
 shared_session = make_session()
 
+# Fallback function for when yfinance fails completely
+def get_basic_stock_data(ticker):
+    """Fallback method using direct Yahoo Finance API when yfinance fails"""
+    import time
+    import random
+    
+    time.sleep(random.uniform(1, 3))
+    
+    try:
+        # Try direct API call
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Referer': 'https://finance.yahoo.com/'
+        }
+        
+        if USE_CURL_CFFI:
+            response = curl_requests.get(url, headers=headers, timeout=15)
+        else:
+            response = requests.get(url, headers=headers, timeout=15)
+            
+        if response.status_code == 200:
+            data = response.json()
+            chart = data.get('chart', {}).get('result', [{}])[0]
+            meta = chart.get('meta', {})
+            
+            return {
+                'regularMarketPrice': meta.get('regularMarketPrice', 0),
+                'currency': meta.get('currency', 'INR'),
+                'marketCap': meta.get('marketCap'),
+                'sharesOutstanding': meta.get('sharesOutstanding'),
+                'financialCurrency': meta.get('currency', 'INR')
+            }
+    except Exception as e:
+        print(f"Fallback method also failed for {ticker}: {e}")
+        
+    return None
+
 currency_symbols = {'USD':'$', 'JPY':'¥', 'AUD':'$', 'NZD':'$', 'EUR':'€', 'GBP':'£', 'ARS':'$', 'HKD':'$', 'INR':'₹', 'CAD':'$', 'MXN':'$', 'IDR':'Rp.', 'SGD':'$', 'CNY':'CN¥', 'TWD':'$'}
 # Hardcoded conversion multiples - all set to 1.0 to eliminate currency conversion
 conversion_multiples = {'USD':1.0, 'JPY':1.0, 'AUD':1.0, 'NZD':1.0, 'EUR':1.0, 'GBP':1.0, 'ARS':1.0, 'HKD':1.0, 'INR':1.0, 'CAD':1.0, 'MXN':1.0, 'IDR':1.0, 'SGD':1.0, 'CNY':1.0, 'TWD':1.0}
@@ -72,10 +110,56 @@ def not_a_float(num):
 
 @functools.cache
 def get_info(ticker):
-  stock      = yf.Ticker(ticker, session=shared_session)
-  income     = stock.income_stmt
-  cashflow   = stock.cashflow
-  stock_info = stock.info
+  import time
+  import random
+  
+  # Add aggressive delay to avoid rate limiting
+  delay = random.uniform(2, 5)
+  print(f"Waiting {delay:.1f}s before fetching {ticker}...")
+  time.sleep(delay)
+  
+  max_retries = 3
+  for attempt in range(max_retries):
+    try:
+      if attempt > 0:
+        retry_delay = 10 * (2 ** attempt) + random.uniform(0, 5)
+        print(f"Retry {attempt} for {ticker} after {retry_delay:.1f}s...")
+        time.sleep(retry_delay)
+      
+      stock      = yf.Ticker(ticker, session=shared_session)
+      income     = stock.income_stmt
+      cashflow   = stock.cashflow
+      stock_info = stock.info
+      
+      # Check if we got valid data
+      if not stock_info or len(stock_info) < 5:
+        raise Exception("Empty or invalid stock info received")
+      
+      break  # Success, exit retry loop
+      
+    except Exception as e:
+      error_str = str(e).lower()
+      if "429" in error_str or "too many requests" in error_str:
+        if attempt == max_retries - 1:
+          # Try fallback method before giving up
+          print(f"yfinance failed for {ticker}, trying fallback method...")
+          fallback_data = get_basic_stock_data(ticker)
+          if fallback_data:
+            print(f"✅ Fallback method succeeded for {ticker}")
+            # Create minimal data structure for fallback
+            stock_info = fallback_data
+            income = None  # No income data in fallback
+            cashflow = None  # No cashflow data in fallback
+            break
+          else:
+            raise Exception(f"Yahoo Finance rate limit exceeded for {ticker}. Both primary and fallback methods failed.")
+        continue
+      elif "404" in error_str or "not found" in error_str:
+        raise Exception(f"Ticker {ticker} not found. Please check the symbol.")
+      else:
+        if attempt == max_retries - 1:
+          raise Exception(f"Failed to fetch data for {ticker}: {str(e)}")
+        continue
 
   # 3 years, 2 years, 1 year
   def get_rates(df):
