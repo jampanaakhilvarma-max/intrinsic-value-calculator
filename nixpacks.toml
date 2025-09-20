@@ -1,12 +1,16 @@
-[build]
-cmd = "cd project && npm install && npm run build"
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "python39"]
 
-[start]
-cmd = "python api_server.py"
+[phases.install] 
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = [
+  "chmod +x start.sh"
+]
+
+[phases.start]
+cmd = "bash start.sh"
 
 [variables]
 PORT = "8000"
-
-[[ports]]
-port = 8000
-protocol = "http"
